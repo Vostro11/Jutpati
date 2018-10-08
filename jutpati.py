@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from termcolor import colored
 
@@ -10,6 +12,7 @@ def create_card_deck():
 
 
 def serve_cards(player=2, cards=5):
+    global global_joker
     card_list = np.arange(0, cards)  # to remove number of cards after serving to player
     deck = create_card_deck()
     deck = deck.reshape((52, 2))
@@ -21,6 +24,7 @@ def serve_cards(player=2, cards=5):
         deck = np.delete(deck, card_list, axis=0)
     served_deck['players'] = players
     served_deck['joker'] = deck[:1]
+    global_joker = served_deck['joker']
     deck = np.delete(deck, 0, axis=0)
     served_deck['deck'] = deck
     return served_deck
@@ -56,12 +60,52 @@ def check_cards(cards, jokers):
     return 1
 
 
+def pick_from_deck(deck, player_cards):
+    picked = deck[:1]
+    player_cards = np.append(player_cards, picked, axis=0)
+    deck = np.delete(deck, 0, axis=0)
+    print(colored(" Computer You picked from Deck ", 'cyan'))
+    return deck, player_cards
+
+
+def pick_card(player_cards, thrown_card, deck):
+    cards = player_cards[:, 1]
+    if len(thrown_card) > 0:
+        if global_joker[:,1] == thrown_card[1]:
+            player_cards = np.append(player_cards, [thrown_card], axis=0)
+            print(colored('Computer Picked Joker', 'cyan'))
+            return deck, player_cards
+
+        thrown = thrown_card[1]
+        if_exist = np.where(cards == [thrown])[0]
+
+        if len(if_exist) == 1 or len(if_exist) == 3:
+            player_cards = np.append(player_cards, [thrown_card], axis=0)
+            print(colored('Computer Picked Thrown Card', 'cyan'))
+        else:
+            deck, player_cards = pick_from_deck(deck, player_cards)
+
+    else:
+        deck, player_cards = pick_from_deck(deck, player_cards)
+    return deck, player_cards
+
+
+def throw_card(player_cards, throw_cards):
+    throw = 1
+
+    for c in player_cards:
+        is_pair = np.where(player_cards == c)[0]
+
+    return throw - 1
+
+
 def play_game():
     served = serve_cards()
     deck = served['deck']
     players = served['players']
     joker = served['joker']
-    thrown_cards = [[]]
+    thrown_cards = [[0, 0]]
+    thrown_cards = np.array(thrown_cards)
     thrown_card = []
     player_turn = 1
     finished = 1
@@ -74,26 +118,30 @@ def play_game():
         print('P' + str(player_turn) + ": You Have \n", players[player_turn])
         print('-------------------------------------------')
 
-        pick = input('P' + str(player_turn) + ': [Pick] Deck=>1, Thrown=>2 :- ')
-        if int(pick) == 1:
-            picked = deck[:1]
-            players[player_turn] = np.append(players[player_turn], picked, axis=0)
-            deck = np.delete(deck, 0, axis=0)
-            print(colored('P' + str(player_turn) + ": !You picked from Deck " + str(picked), 'cyan'))
+        if player_turn == 2:
+            deck, players[player_turn] = pick_card(players[player_turn], thrown_card, deck)
         else:
-            if len(thrown_card) > 0:
+            pick = input('P' + str(player_turn) + ': [Pick] Deck=>1, Thrown=>2 :- ')
 
-                print(players[player_turn])
-                players[player_turn] = np.append(players[player_turn], [thrown_card], axis=0)
-                print('Thron Card ==> ', players[player_turn])
-                print(colored('P' + str(player_turn) + ": !You picked Thrown Card " + str(thrown_card), 'cyan'))
-            else:
+            if int(pick) == 1:
                 picked = deck[:1]
                 players[player_turn] = np.append(players[player_turn], picked, axis=0)
                 deck = np.delete(deck, 0, axis=0)
-                print('P', str(player_turn), ":! No Thrown Card !\nYou picked from Deck:", picked)
-                print(colored('P' + str(player_turn) + ":! No Thrown Card !\n !You picked from Deck " + str(picked),
-                              'cyan'))
+                print(colored('P' + str(player_turn) + ": !You picked from Deck " + str(picked), 'cyan'))
+            else:
+                if len(thrown_card) > 0:
+
+                    print(players[player_turn])
+                    players[player_turn] = np.append(players[player_turn], [thrown_card], axis=0)
+                    print('Thron Card ==> ', players[player_turn])
+                    print(colored('P' + str(player_turn) + ": !You picked Thrown Card " + str(thrown_card), 'cyan'))
+                else:
+                    picked = deck[:1]
+                    players[player_turn] = np.append(players[player_turn], picked, axis=0)
+                    deck = np.delete(deck, 0, axis=0)
+                    print('P', str(player_turn), ":! No Thrown Card !\nYou picked from Deck:", picked)
+                    print(colored('P' + str(player_turn) + ":! No Thrown Card !\n !You picked from Deck " + str(picked),
+                                  'cyan'))
 
         finished = check_cards(players[player_turn], joker)
 
@@ -106,8 +154,15 @@ def play_game():
         print(colored('Joker:' + str(joker), 'green'))
         print('-------------------------------------------')
 
-        throw = int(input('P' + str(player_turn) + ': [Throw] :- ')) - 1
+        if player_turn == 2:
+            throw = throw_card(players[player_turn], thrown_cards)
+        else:
+            throw = int(input('P' + str(player_turn) + ': [Throw] :- ')) - 1
         thrown_card = players[player_turn][throw]
+
+        thrown_cards = np.append(thrown_cards, [thrown_card], axis=0)
+        thrown_cards = np.delete(thrown_cards, 0, axis=0)
+
         players[player_turn] = np.delete(players[player_turn], throw, axis=0)
         print(colored('Player' + str(player_turn) + ":! You Threw " + str(thrown_card), 'red'))
 
