@@ -1,4 +1,5 @@
 import numpy as np
+from termcolor import colored
 
 
 def create_card_deck():
@@ -67,30 +68,32 @@ def play_game():
 
     while finished:
         print('-------------------------------------------')
-        print('Player', str(player_turn), 'Turn:')
-        print('Joker:', joker)
+        print(colored('Player ' + str(player_turn) + ' Turn:\n', 'blue'))
+        print(colored('Joker:' + str(joker), 'green'))
         print('-------------------------------------------')
-        print('P'+str(player_turn)+": You Have \n", players[player_turn])
+        print('P' + str(player_turn) + ": You Have \n", players[player_turn])
         print('-------------------------------------------')
 
-        pick = input('P' + str(player_turn)+': [Pick] Deck=>1, Thrown=>2 :- ')
+        pick = input('P' + str(player_turn) + ': [Pick] Deck=>1, Thrown=>2 :- ')
         if int(pick) == 1:
             picked = deck[:1]
             players[player_turn] = np.append(players[player_turn], picked, axis=0)
             deck = np.delete(deck, 0, axis=0)
-            print('P', str(player_turn), ": !You picked from Deck", picked)
+            print(colored('P' + str(player_turn) + ": !You picked from Deck " + str(picked), 'cyan'))
         else:
             if len(thrown_card) > 0:
 
                 print(players[player_turn])
                 players[player_turn] = np.append(players[player_turn], [thrown_card], axis=0)
                 print('Thron Card ==> ', players[player_turn])
-                print('P'+str(player_turn), ": !You picked Thrown Card", thrown_card)
+                print(colored('P' + str(player_turn) + ": !You picked Thrown Card " + str(thrown_card), 'cyan'))
             else:
                 picked = deck[:1]
                 players[player_turn] = np.append(players[player_turn], picked, axis=0)
                 deck = np.delete(deck, 0, axis=0)
                 print('P', str(player_turn), ":! No Thrown Card !\nYou picked from Deck:", picked)
+                print(colored('P' + str(player_turn) + ":! No Thrown Card !\n !You picked from Deck " + str(picked),
+                              'cyan'))
 
         finished = check_cards(players[player_turn], joker)
 
@@ -100,13 +103,13 @@ def play_game():
 
         print('-------------------------------------------')
         print('P' + str(player_turn) + ": You Have \n", players[player_turn])
-        print('Joker:', joker)
+        print(colored('Joker:' + str(joker), 'green'))
         print('-------------------------------------------')
 
-        throw = int(input('P'+str(player_turn)+': [Throw] :- ')) - 1
+        throw = int(input('P' + str(player_turn) + ': [Throw] :- ')) - 1
         thrown_card = players[player_turn][throw]
         players[player_turn] = np.delete(players[player_turn], throw, axis=0)
-        print('Player', str(player_turn), ":! You Threw ", thrown_card)
+        print(colored('Player' + str(player_turn) + ":! You Threw " + str(thrown_card), 'red'))
 
         if player_turn == len(players):
             player_turn = 1
