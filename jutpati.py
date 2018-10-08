@@ -2,11 +2,9 @@ import numpy as np
 
 
 def create_card_deck():
-    values = np.arange(1, 14)
-    suites = np.arange(1, 5)
-    deck = [[s, v] for s in suites for v in values]
-    deck = np.asarray(deck)
-    deck = deck.reshape((4, 13, 2))
+    card_values = np.repeat(np.arange(1, 14), 4)
+    card_suites = np.tile(np.arange(1, 5), 13)
+    deck = np.column_stack([card_suites, card_values])
     return deck
 
 
