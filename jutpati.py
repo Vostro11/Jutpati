@@ -66,7 +66,7 @@ def pick_from_deck(deck, player_cards):
 def pick_card(player_cards, thrown_card, deck):
     cards = player_cards[:, 1]
     if len(thrown_card) > 0:
-        if global_joker[:,1] == thrown_card[1]:
+        if global_joker[:, 1] == thrown_card[1]:
             player_cards = np.append(player_cards, [thrown_card], axis=0)
             print(colored('Computer Picked Joker', 'cyan'))
             return deck, player_cards
